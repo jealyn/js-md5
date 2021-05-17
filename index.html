@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文件MD5获取</title>
+  </head>
+  <body>
+    <!-- 文件上传框 -->
+    <input type="file" id="input" />
+    <!-- md5值 -->
+    <div><span id="md5Value"></span></div>
+  </body>
+  <script>
+    // 创建worker
+    const md5Worker = new Worker("md5.js");
+    const handleFileChange = (e) => {
+      if (!e.target || !e.target.files || !e.target.files.length) return;
+
+      // 向worker发送消息
+      md5Worker.postMessage(e.target.files[0]);
+      // 接受worker线程返回的消息
+      md5Worker.onmessage = function ({ data }) {
+        document.getElementById("md5Value").textContent =
+          "文件的MD5是：" + data;
+      };
+      // worker线程异常监听
+      md5Worker.onerror = function (e) {
+        console.error(e);
+      };
+    };
+
+    document
+      .getElementById("input")
+      .addEventListener("change", handleFileChange, false);
+  </script>
+</html>
